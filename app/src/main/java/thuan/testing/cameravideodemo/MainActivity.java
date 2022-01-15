@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +20,10 @@ import android.view.View;
 import android.widget.VideoView;
 
 import java.io.File;
+import java.io.FileWriter;
+
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity {
     private static int Video_Request = 101;
@@ -36,6 +41,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE}, 1);
+    }
+
+    public void writeFileOnInternalStorage(Context mcoContext, String sFileName, String sBody){
+        File dir = new File("/sdcard/DCIM", "mydir");
+        if(!dir.exists()){
+            dir.mkdir();
+        }
+
+        try {
+            File gpxfile = new File(dir, sFileName);
+            FileWriter writer = new FileWriter(gpxfile);
+            writer.append(sBody);
+            writer.flush();
+            writer.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void captureVideo(View view) {
@@ -44,8 +67,12 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = Uri.fromFile(video_file);
         String path = getFilesDir().getAbsolutePath();
 
+        writeFileOnInternalStorage(this, "thuan.txt", "12345678974563214560");
+
+        File dir = new File("/sdcard/DCIM", "mydir");
+
         File localStoragePath = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", localStoragePath));
+        videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, dir );
         videoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
         myLauncher.launch(videoIntent);
 //        if (videoIntent.resolveActivity(getPackageManager()) != null) {
